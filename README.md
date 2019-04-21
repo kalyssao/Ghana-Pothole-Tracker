@@ -8,8 +8,8 @@ The purpose of this project is to introduce an element of crowdsourcing for civi
 Expected input data is a folder of images, with the naming convention of the folder contents representing the image classes. eg. pothole.1.png & not_a_pothole.1.png
 The full stops are necessary, as the script splits the filenames in order to get the image label.
 
-### Usage
-These files are meant to be run in the command line, with the syntax "pythonx file_name.py --dataset /path/to/dataset/here"
+## Usage
+These files are meant to be run via command line, with the syntax **"python3 file_name.py --dataset /path/to/dataset/here"**
 The output is the classification metrics and confusion matrix for the given data.
 
 An extra script (test.py) is included to allow the user to verify the results with their own data.
