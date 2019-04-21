@@ -1,20 +1,13 @@
 # import the necessary packages
-import sklearn
-from sklearn.preprocessing import LabelEncoder
-from sklearn.svm import LinearSVC
-from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split
-from imutils import paths
-import numpy as np
-import argparse
 import imutils
 import cv2
-import os
 import time
 import serial
 import string
 import MySQLdb
 import pynmea2
+from joblib import load
+
 
 def extract_color_histogram(image, bins=(8, 8, 8)):
     # extract a 3D color histogram from the HSV color space using
@@ -36,48 +29,16 @@ def extract_color_histogram(image, bins=(8, 8, 8)):
     return hist.flatten()
 
 
-def SVM_classifier(path):
-    # initialize the data matrix and labels list
-    data = []
-    labels = []
-    # grab the list of images that we'll be describing
-    folderPath = path
-    imagePaths = os.listdir("/Users/lvz/PycharmProjects/pothole_classifier/pothole_classifier")
-
-    # loop over the input images
-    for imageName in imagePaths:
-        image = cv2.imread(folderPath + "/" + imageName)
-
-        # extract a color histogram feature from the image and update labels and data
-        feature = extract_color_histogram(image)
-        data.append(feature)
-
-        label = imageName.split(os.path.sep)[-1].split(".")[0]
-        labels.append(label)
-
-    # encode the labels, converting them from strings to integers
-    le = LabelEncoder()
-    labels = le.fit_transform(labels)
-
-    (trainData, testData, trainLabels, testLabels) = train_test_split(
-        np.array(data), labels, test_size=0.25, random_state=42)
-
-    svmFit = LinearSVC()
-    svmFit.fit(trainData, trainLabels)
-
-    return svmFit
-
-
 def transmit(latitude, longitude):
     # initialising the database connection
     username = "admin"
     db = MySQLdb.connect(host="localhost", user="root", passwd="password", db="fix_ghanas_potholes")
     cur = db.cursor()
-    sql = "INSERT INTO location_data (admin, latitude, longitude) VALUES (%f,%f)"
+    sql = "INSERT INTO location_data (username, latitude, longitude) VALUES (%s, %f,%f)"
 
     try:
         print("Inserting into database")
-        cur.execute(sql, latitude, longitude)
+        cur.execute(sql, username, latitude, longitude)
         db.commit()
         print("done!")
 
@@ -90,10 +51,7 @@ def transmit(latitude, longitude):
 
 
 # main function contains while loop
-def main(model):
-    # initialising the ports and serial for the NMEA GPS sensor
-    port = "/dev/ttyS0"
-    ser = serial.Serial(port, baudrate=9600, timeout=0.5)
+def main():
 
     # initialising the camera
     camera = PiCamera()
@@ -107,18 +65,21 @@ def main(model):
         # counter to keep track of number of positives
         num_potholes = 0
         threshold = 10
+        found = False
 
-        # keep track of NMEA strings
-        dataOut = pynmea2.NMEAStreamReader()
-        newData = ser.readline()
+        # initialising the ports and serial for the NMEA strings
+        with serial.Serial("/dev/ttyAMA0", baudrate=9600, timeout=1) as ser:
+            newData = ser.readline().decode('ascii', errors='replace')
 
-        if newData[0:6] == '$GPGGA':
-            newMsg = pynmea2.parse(newData)
-            lat = newMsg.latitude
-            lng = newMsg.longitude
-        else:
             # doesn't grab frame until the lat and lng are found
-            pass
+            if newData[0:6] == '$GPGGA':
+                newMsg = pynmea2.parse(newData)
+                lat = newMsg.latitude
+                lng = newMsg.longitude
+                found = True
+            else:
+                found = False
+                continue
 
         # Monitor video feed, and apply model on each image (time delay?)
         camera.capture(raw_capture, format="bgr")
@@ -130,14 +91,15 @@ def main(model):
             image = frame.array
 
             img_vec = extract_color_histogram(image)
-            res = model.predict(img_vec)
+            svmFit = load('svmFit.joblib')
+            res = svmFit.predict(img_vec)   # returns a vector
 
-            if res == 1:
+            if 1 in res:
                 # increment potholes, check if above threshold
                 # if so, pass the number of potholes as well (?)
                 num_potholes += 1
 
-                if num_potholes >= threshold & lat & lng:
+                if num_potholes >= threshold and found:
                     transmit(lat, lng)
 
             else:
@@ -145,5 +107,4 @@ def main(model):
 
 
 if __name__ == "main":
-    svm = SVM_classifier("/Users/lvz/PycharmProjects/pothole_classifier/pothole_classifier")
-    main(svm)
+    main()
