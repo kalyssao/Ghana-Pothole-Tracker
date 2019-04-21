@@ -5,6 +5,7 @@
 import sklearn
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
+from joblib import dump, load
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from imutils import paths
@@ -81,10 +82,12 @@ print("[INFO] constructing training/testing split...")
 print("[INFO] training Linear SVM classifier...")
 svmFit = LinearSVC()
 svmFit.fit(trainData, trainLabels)
+dump(svmFit, 'svmFit.joblib')
 
 # evaluate the classifier
 print("[INFO] evaluating classifier...")
 predictions = svmFit.predict(testData)
 print(classification_report(testLabels, predictions,
-    target_names=le.classes_))
+     target_names=le.classes_))
+
 
