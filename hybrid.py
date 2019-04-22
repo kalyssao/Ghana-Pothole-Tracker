@@ -1,8 +1,6 @@
-#    Title: linear_classifier.py
-#    Author: A. Rosebrock
-#    Date: August 22, 2016
-#    Code version: 1
-#    Availability: https://www.pyimagesearch.com/2016/08/22/an-intro-to-linear-classification-with-python/
+#    Adapted from "Using Keras pre-trained models for feature extraction.." by Franky (2018)
+#    Availability:
+#    https://medium.com/@franky07724_57962/using-keras-pre-trained-models-for-feature-extraction-in-image-clustering-a142c6cdf5b1
 
 from keras.applications.inception_v3 import InceptionV3
 from keras.applications.inception_v3 import preprocess_input

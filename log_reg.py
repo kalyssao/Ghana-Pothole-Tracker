@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from imutils import paths
-from svm import extract_color_histogram
+from joblib import dump
 from numpy import ravel
 import numpy as np
 import argparse
@@ -17,6 +17,24 @@ import cv2
 import os
 
 
+def extract_color_histogram(image, bins=(8, 8, 8)):
+    # extract a 3D color histogram from the HSV color space using
+    # the supplied number of `bins` per channel
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    hist = cv2.calcHist([hsv], [0, 1, 2], None, bins,
+        [0, 180, 0, 256, 0, 256])
+
+    # handle normalizing the histogram if we are using OpenCV 2.4.X
+    if imutils.is_cv2():
+        hist = cv2.normalize(hist)
+
+    # otherwise, perform "in place" normalization in OpenCV 3
+    else:
+        cv2.normalize(hist, hist)
+
+    # return the flattened histogram as the feature vector
+    return hist.flatten()
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--dataset", required=True,
@@ -51,6 +69,7 @@ for (i, imagePath) in enumerate(imagePaths):
 # encode the labels, converting them from strings to integers
 le = LabelEncoder()
 labels = le.fit_transform(labels)
+print(labels)
 
 # partition the data into training and testing splits, using 75%
 # of the data for training and the remaining 25% for testing
@@ -60,6 +79,7 @@ print("[INFO] constructing training/testing split...")
 
 classifier = LogisticRegression()
 classifier.fit(trainData, trainLabels)
+dump(classifier, 'log_reg')
 
 # evaluate the classifier, classification report and confusion matrix
 print("[INFO] evaluating classifier...")

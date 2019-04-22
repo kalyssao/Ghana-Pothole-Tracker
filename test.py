@@ -23,27 +23,29 @@ def extract_color_histogram(image, bins=(8, 8, 8)):
     # return the flattened histogram as the feature vector
     return hist.flatten()
 
-
+svmFit = load('svmFit.joblib')
 data = []
-results = []
+labels = []
 # load the test images
 folderPath = "/Users/lvz/PycharmProjects/pothole_classifier/test"
 for imageName in os.listdir(folderPath):
     if imageName != ".DS_Store":
+        data = []
         print("[INFO] classifying {}".format(imageName))
-
         image = cv2.imread(folderPath + "/" + imageName)
 
         # extract a color histogram feature from the image
         feature = extract_color_histogram(image)
         data.append(feature)
-        svmFit = load('svmFit.joblib')
+
         label = svmFit.predict(data)
+        labels.append(label)
         label = "{}".format(label)
         # draw the class and probability on the test image and display it
         #  to our screen
-        #cv2.putText(image, label, (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 3)
-       # cv2.imwrite("result_" + imageName, image)
-        data = []
+        print(labels)
+        cv2.putText(image, label, (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 3)
+        cv2.imwrite("result_" + imageName, image)
+
     else:
         continue
