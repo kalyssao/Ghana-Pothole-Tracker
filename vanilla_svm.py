@@ -1,5 +1,6 @@
-# USAGE
-# python3 svm_tuned.py --dataset pothole_classifier
+#    Classifier code adapted from linear_classifier.py by A. Rosebrock
+#    Availability: https://www.pyimagesearch.com/2016/08/22/an-intro-to-linear-classification-with-python/
+#    Usage: python3 vanilla_svm.py --dataset pothole_classifier
 
 # import the necessary packages
 import sklearn

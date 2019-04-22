@@ -1,3 +1,7 @@
+#    Classifier code adapted from linear_classifier.py by A. Rosebrock
+#    Availability: https://www.pyimagesearch.com/2016/08/22/an-intro-to-linear-classification-with-python/
+#    Usage: python3 log_reg.py --dataset /path/to/dataset
+
 # import the necessary packages
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
@@ -57,13 +61,12 @@ print("[INFO] constructing training/testing split...")
 classifier = LogisticRegression()
 classifier.fit(trainData, trainLabels)
 
-# evaluate the classifier
+# evaluate the classifier, classification report and confusion matrix
 print("[INFO] evaluating classifier...")
 predictions = classifier.predict(testData)
-ll = log_loss(testLabels, predictions, eps=1e-15, normalize=True, sample_weight=None, labels=[0, 1])
-print("log loss", ll)
 
+print("[INFO] classification report...")
 print(classification_report(testLabels, predictions, target_names=le.classes_))
 
+print("[INFO] confusion matrix (tp, fp, tn, tp)...")
 tn, fp, fn, tp = confusion_matrix(testLabels, predictions).ravel()
-print(tn, fp, fn, tp)

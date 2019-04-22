@@ -7,17 +7,20 @@ import cv2
 import time
 import serial
 import string
+import MySQLdb
 import pynmea2
 
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-from transmit.py import transmit
-from svm.py import extract_color_histogram
-from svm.py import svmFit
+from joblib import dump, load
 
 # initialising the ports and serial for the NMEA GPS sensor
 port = "/dev/ttyS0"
 ser = serial.Serial(port, baudrate=9600, timeout=0.5)
+
+# database connection initialisation
+db = MySQLdb.connect(host="localhost", user="root", passwd="password", db="locations_data")
+cur = db.cursor()
 
 # initialises the camera
 camera = PiCamera()
@@ -28,9 +31,13 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 # allows camera warmup
 time.sleep(0.1)
 
+def readLocation():
+
+
 while 1:
     # counter to keep track of number of positives
     numPotholes = 0
+    threshold = 10
     # keep track of GPS
     dataOut = pynmea2.NMEAStreamReader()
     newData = ser.readline()
@@ -48,12 +55,12 @@ while 1:
     image = rawCapture.array
 
     # For frame in video, extract features and predict
-    for frame in camera.capture_continuous(rawCapture, format="bgr",
-                                           use_video_port=True):
+    for frame in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
         # can do resizing in here
         image = frame.array
 
         imgVec = extract_color_histogram(image)
+        svmFit = load('svmFit.joblib')
         res = svmFit.predict(imgVec)
 
         if res == 1:
@@ -66,4 +73,3 @@ while 1:
 
         else:
             numPotholes = 0
-

@@ -1,3 +1,6 @@
+#    Camera setup code adapted from test_image.py by A. Rosebrock
+#    Availability: https://www.pyimagesearch.com/2015/03/30/accessing-the-raspberry-pi-camera-with-opencv-and-python/
+
 # import the necessary packages
 import imutils
 import cv2
