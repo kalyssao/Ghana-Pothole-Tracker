@@ -58,7 +58,6 @@ while 1:
     for frame in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
         # can do resizing in here
         image = frame.array
-
         imgVec = extract_color_histogram(image)
         svmFit = load('svmFit.joblib')
         res = svmFit.predict(imgVec)

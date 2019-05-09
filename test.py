@@ -4,6 +4,7 @@ import os
 import cv2
 import imutils
 
+
 def extract_color_histogram(image, bins=(8, 8, 8)):
     # extract a 3D color histogram from the HSV color space using
     # the supplied number of `bins` per channel
@@ -23,7 +24,9 @@ def extract_color_histogram(image, bins=(8, 8, 8)):
     # return the flattened histogram as the feature vector
     return hist.flatten()
 
-svmFit = load('svmFit.joblib')
+
+
+svmFit = load('hybrid_svmFit.joblib')
 data = []
 labels = []
 # load the test images
@@ -38,7 +41,7 @@ for imageName in os.listdir(folderPath):
         feature = extract_color_histogram(image)
         data.append(feature)
 
-        label = svmFit.predict(data)
+        label = svmFit.predict(feature)
         labels.append(label)
         label = "{}".format(label)
         # draw the class and probability on the test image and display it
