@@ -5,7 +5,7 @@ These co-ordinates are then plotted on a web application to inform user's route 
 The purpose of this project is to introduce an element of crowdsourcing for civil good in user journeys, making it easier for the mobile maintenance units (MMU's) to gather data about road improvement projects.
 
 ### Demo
-![App Screenshot](https://user-images.githubusercontent.com/35347604/89157059-5ef3d600-d55b-11ea-9ddb-6fd4d87fe0e5.png)
+![App Screenshot](https://user-images.githubusercontent.com/35347604/89157223-af6b3380-d55b-11ea-9a06-ff6489f88354.png)
 
 ### Dataset
 Expected input data is a folder of images, with the naming convention of the folder contents representing the image classes. eg. **pothole.1.png** & **not_a_pothole.1.png** <br/>
